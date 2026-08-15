@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+smoke-dist
+*.local
+.vercel
+.DS_Store
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
