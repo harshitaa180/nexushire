@@ -51,7 +51,7 @@ whole board rescoring on every keystroke stays imperceptible.
 ## Résumé import
 
 Drag in a **PDF, Word (.docx), TXT, Markdown, RTF or HTML** file — or paste text.
-An n-gram scanner (up to trigrams, longest-match-wins) resolves 70+ skills and their
+An n-gram scanner (up to trigrams, longest-match-wins) resolves 65 skills and their
 aliases — `ES6`, `react.js`, `Core Web Vitals`, `k8s` — against the canonical taxonomy,
 and a conservative header scrape fills in your name, headline and years of experience.
 

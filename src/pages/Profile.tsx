@@ -366,7 +366,7 @@ function SkillsPanel({
       </Panel>
 
       <Panel title="Add a skill">
-        <TextInput value={search} onChange={setSearch} placeholder="Search 70+ skills…" />
+        <TextInput value={search} onChange={setSearch} placeholder={`Search ${SKILLS.length} skills…`} />
         <div className="mt-3 max-h-[28rem] space-y-3 overflow-y-auto pr-1">
           {Object.entries(CATEGORY_META).map(([category, meta]) => {
             const group = available.filter((s) => s.category === category)

@@ -136,7 +136,7 @@ export function Landing() {
             <AnimatedRule />
             <div className="grid grid-cols-2 gap-y-7 pt-7 sm:grid-cols-4">
               <RailStat value={JOBS.length} label="live roles" />
-              <RailStat value={SKILLS.length} label="skills in the graph" suffix="+" />
+              <RailStat value={SKILLS.length} label="skills in the graph" />
               <RailStat value={Object.keys(FACET_WEIGHTS).length} label="scoring dimensions" />
               <RailStat value={0} label="server round-trips" suffix="ms" />
             </div>
@@ -484,7 +484,7 @@ const DIFFERENTIATORS = [
   {
     icon: <ScanSearch className="h-4 w-4" />,
     title: 'Résumé parsing that handles real files',
-    body: 'Drop in a PDF, a Word document or plain text. An n-gram scanner resolves seventy-plus skills and their aliases — ES6, react.js, Core Web Vitals, k8s — into a canonical profile. Parsing happens in your browser; nothing is uploaded anywhere.',
+    body: 'Drop in a PDF, a Word document or plain text. An n-gram scanner resolves sixty-five skills and their aliases — ES6, react.js, Core Web Vitals, k8s — into a canonical profile. Parsing happens in your browser; nothing is uploaded anywhere.',
     accent: '#2b7f8f',
   },
   {
