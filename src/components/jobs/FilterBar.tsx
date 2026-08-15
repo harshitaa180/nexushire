@@ -78,7 +78,7 @@ export function FilterBar({ resultCount }: { resultCount: number }) {
               {filters.sort === sort.key && (
                 <motion.span
                   layoutId="sort-pill"
-                  className="absolute inset-0 rounded-xl bg-[linear-gradient(120deg,#7c5cff,#6d5cff)]"
+                  className="absolute inset-0 rounded-xl bg-[linear-gradient(120deg,#6d4aff,#5b3df0)]"
                   transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
               )}
@@ -95,7 +95,7 @@ export function FilterBar({ resultCount }: { resultCount: number }) {
         >
           Filters
           {activeCount > 0 && (
-            <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-[linear-gradient(120deg,#7c5cff,#22d3ee)] px-1.5 text-[10px] font-bold text-white">
+            <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-[linear-gradient(120deg,#6d4aff,#06b6d4)] px-1.5 text-[10px] font-bold text-white">
               {activeCount}
             </span>
           )}
@@ -113,7 +113,7 @@ export function FilterBar({ resultCount }: { resultCount: number }) {
           <button
             type="button"
             onClick={clearFilters}
-            className="ml-auto text-[11.5px] font-medium text-[#7c5cff] transition-opacity hover:opacity-70"
+            className="ml-auto text-[11.5px] font-medium text-[#6d4aff] transition-opacity hover:opacity-70"
           >
             Clear all
           </button>
@@ -236,7 +236,7 @@ function SliderRow({
         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
           {label}
         </span>
-        <span className="font-mono text-xs text-[#7c5cff]">{format(value)}</span>
+        <span className="font-mono text-xs text-[#6d4aff]">{format(value)}</span>
       </div>
       <input
         type="range"

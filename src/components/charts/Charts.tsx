@@ -26,7 +26,7 @@ export interface RadarAxis {
 export function RadarChart({
   axes,
   size = 260,
-  color = '#7c5cff',
+  color = '#1b2b4b',
   className,
 }: {
   axes: RadarAxis[]
@@ -53,8 +53,8 @@ export function RadarChart({
     <svg width={size} height={size} className={cn('overflow-visible', className)} role="img" aria-label="Match facet radar">
       <defs>
         <radialGradient id={gradientId}>
-          <stop offset="0%" stopColor={color} stopOpacity="0.55" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.12" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.07" />
         </radialGradient>
       </defs>
 
@@ -93,12 +93,13 @@ export function RadarChart({
         points={polygon}
         fill={`url(#${gradientId})`}
         stroke={color}
-        strokeWidth={2}
+        strokeWidth={1.5}
         strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 0 10px ${color}70)`, transformOrigin: `${cx}px ${cy}px` }}
+        style={{ transformOrigin: `${cx}px ${cy}px` }}
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
       />
 
       {/* Vertices */}
@@ -109,13 +110,14 @@ export function RadarChart({
             key={a.label}
             cx={x}
             cy={y}
-            r={3.5}
+            r={2.75}
             fill={color}
             stroke="var(--bg)"
-            strokeWidth={2}
+            strokeWidth={1.75}
             initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5 + i * 0.06, type: 'spring', stiffness: 400, damping: 18 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 + i * 0.06, type: 'spring', stiffness: 380, damping: 20 }}
           />
         )
       })}
@@ -201,9 +203,9 @@ export function DonutChart({
               strokeDasharray={`${dash} ${gap}`}
               strokeDashoffset={-circumference * rotation}
               initial={{ opacity: 0, strokeWidth: 0 }}
-              animate={{ opacity: 1, strokeWidth: thickness }}
-              transition={{ delay: i * 0.09, duration: 0.55, ease: 'easeOut' }}
-              style={{ filter: `drop-shadow(0 0 6px ${slice.color}80)` }}
+              whileInView={{ opacity: 1, strokeWidth: thickness }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.09, duration: 0.6, ease: 'easeOut' }}
             />
           )
         })}
@@ -244,21 +246,21 @@ export function BarList({ rows, max }: { rows: BarRow[]; max?: number }) {
         >
           {/* The bar sits behind the label — a "table with a heatmap" pattern */}
           <motion.div
-            className="absolute inset-y-0 left-0 rounded-lg"
-            style={{ background: `linear-gradient(90deg, ${row.color}33, ${row.color}12)` }}
+            className="absolute inset-y-0 left-0 rounded-md"
+            style={{ background: `linear-gradient(90deg, ${row.color}24, ${row.color}0a)` }}
             initial={{ width: 0 }}
-            animate={{ width: `${(row.value / ceiling) * 100}%` }}
-            transition={{ delay: 0.15 + i * 0.05, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            whileInView={{ width: `${(row.value / ceiling) * 100}%` }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.15 + i * 0.05, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           />
-          <div className="relative flex items-center justify-between px-3 py-2 text-sm">
-            <span className="flex items-center gap-2 font-medium">
-              <span
-                className="h-2 w-2 shrink-0 rounded-full"
-                style={{ background: row.color, boxShadow: `0 0 8px ${row.color}` }}
-              />
-              {row.label}
-            </span>
-            <span className="shrink-0 text-xs tabular-nums text-muted">{row.hint ?? row.value}</span>
+          {/* Left rule marks the row against the bar fill */}
+          <span
+            className="absolute inset-y-1 left-0 w-[2px] rounded-full"
+            style={{ background: row.color }}
+          />
+          <div className="relative flex items-center justify-between py-2 pl-3 pr-3 text-[13px]">
+            <span className="font-medium">{row.label}</span>
+            <span className="shrink-0 text-[11.5px] tnum text-muted">{row.hint ?? row.value}</span>
           </div>
         </motion.div>
       ))}
@@ -272,7 +274,7 @@ export function Sparkline({
   points,
   width = 120,
   height = 34,
-  color = '#22d3ee',
+  color = '#2d6fa3',
 }: {
   points: number[]
   width?: number
@@ -299,7 +301,7 @@ export function Sparkline({
     <svg width={width} height={height} className="overflow-visible">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.4" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
@@ -308,13 +310,13 @@ export function Sparkline({
         d={line}
         fill="none"
         stroke={color}
-        strokeWidth={2}
+        strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
         initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.1, ease: 'easeOut' }}
-        style={{ filter: `drop-shadow(0 0 5px ${color}90)` }}
+        whileInView={{ pathLength: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
       />
     </svg>
   )
@@ -330,16 +332,14 @@ export function Histogram({ buckets, colors }: { buckets: number[]; colors: stri
       {buckets.map((count, i) => (
         <div key={i} className="group flex flex-1 flex-col items-center gap-1.5">
           <motion.div
-            className="w-full rounded-t-md"
-            style={{
-              background: `linear-gradient(180deg, ${colors[i]}, ${colors[i]}44)`,
-              boxShadow: `0 0 14px -2px ${colors[i]}90`,
-            }}
+            className="w-full rounded-t-[3px]"
+            style={{ background: `linear-gradient(180deg, ${colors[i]}, ${colors[i]}55)` }}
             initial={{ height: 0 }}
-            animate={{ height: `${Math.max(4, (count / max) * 100)}%` }}
-            transition={{ delay: i * 0.07, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            whileInView={{ height: `${Math.max(4, (count / max) * 100)}%` }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.07, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           />
-          <span className="text-[10px] tabular-nums text-faint">{count}</span>
+          <span className="text-[10px] tnum text-faint">{count}</span>
         </div>
       ))}
     </div>

@@ -2,6 +2,7 @@ node_modules
 dist
 dist-ssr
 smoke-dist
+smoke-dist-resume
 *.local
 .vercel
 .DS_Store

@@ -5,7 +5,6 @@ import {
   KanbanSquare,
   Menu,
   Moon,
-  Sparkles,
   Sun,
   UserRound,
   X,
@@ -60,16 +59,19 @@ export function Navbar() {
           <div
             className={cn(
               'flex w-full items-center gap-3 rounded-2xl px-3 py-2 transition-all duration-300',
-              scrolled ? 'glass-strong' : 'border border-transparent',
+              scrolled
+                ? 'border border-[rgb(var(--border)/var(--border-alpha))] bg-[rgb(var(--surface)/0.88)] shadow-[var(--shadow-card)] backdrop-blur-xl'
+                : 'border border-transparent',
             )}
           >
             <NavLink to="/" className="group flex items-center gap-2.5 pl-1 pr-2">
-              <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(135deg,#7c5cff,#22d3ee)] shadow-[0_6px_20px_-6px_rgba(124,92,255,0.9)]">
-                <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.4} />
-                <div className="absolute inset-0 rounded-xl bg-[linear-gradient(135deg,#7c5cff,#22d3ee)] opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-80" />
+              <div className="grid h-8 w-8 place-items-center rounded-md bg-[var(--ink)] transition-transform duration-300 group-hover:-rotate-3">
+                <span className="font-display text-[17px] font-semibold leading-none text-[var(--bg)]">
+                  N
+                </span>
               </div>
-              <span className="font-display text-[17px] font-bold tracking-tight">
-                Nexus<span className="text-gradient">Hire</span>
+              <span className="font-display text-[18px] font-semibold tracking-[-0.02em]">
+                Nexus<span className="text-ink">Hire</span>
               </span>
             </NavLink>
 
@@ -91,9 +93,9 @@ export function Navbar() {
                     className="grid place-items-center"
                   >
                     {theme === 'dark' ? (
-                      <Sun className="h-4 w-4 text-amber-300" />
+                      <Sun className="h-4 w-4 text-[var(--accent)]" />
                     ) : (
-                      <Moon className="h-4 w-4 text-indigo-500" />
+                      <Moon className="h-4 w-4 text-ink" />
                     )}
                   </motion.span>
                 </AnimatePresence>
@@ -135,8 +137,8 @@ export function Navbar() {
                   to={link.to}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
-                      isActive ? 'bg-[rgb(var(--surface)/0.16)] text-gradient' : 'text-muted',
+                      'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
+                      isActive ? 'bg-[var(--ink-soft)] text-ink' : 'text-muted',
                     )
                   }
                 >
@@ -168,23 +170,24 @@ function NavItem({
       {({ isActive }) => (
         <span
           className={cn(
-            'relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-200',
+            'relative flex items-center gap-2 px-3 py-2 text-[13.5px] font-medium transition-colors duration-200',
             isActive ? 'text-[var(--text)]' : 'text-muted hover:text-[var(--text)]',
           )}
         >
-          {isActive && (
-            <motion.span
-              layoutId="nav-pill"
-              className="absolute inset-0 rounded-xl bg-[rgb(var(--surface)/0.18)] ring-1 ring-[rgb(var(--border)/0.2)]"
-              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            />
-          )}
-          <Icon className="relative h-4 w-4" />
-          <span className="relative">{label}</span>
+          <Icon className="h-3.5 w-3.5 opacity-70" />
+          <span>{label}</span>
           {Boolean(badge) && (
-            <span className="relative grid h-4 min-w-4 place-items-center rounded-full bg-[linear-gradient(120deg,#7c5cff,#22d3ee)] px-1 text-[10px] font-bold text-white">
+            <span className="grid h-4 min-w-4 place-items-center rounded-[3px] bg-[var(--ink)] px-1 text-[9.5px] font-semibold tnum text-[var(--bg)]">
               {badge}
             </span>
+          )}
+          {/* Editorial underline rather than a filled pill */}
+          {isActive && (
+            <motion.span
+              layoutId="nav-underline"
+              className="absolute inset-x-2 -bottom-0.5 h-[1.5px] rounded-full bg-[var(--ink)]"
+              transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+            />
           )}
         </span>
       )}

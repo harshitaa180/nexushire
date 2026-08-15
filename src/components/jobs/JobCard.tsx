@@ -63,7 +63,7 @@ export function JobCard({ job, match, index, onOpen }: JobCardProps) {
       />
 
       {job.featured && (
-        <div className="absolute right-0 top-0 overflow-hidden rounded-bl-2xl rounded-tr-3xl bg-[linear-gradient(120deg,#7c5cff,#22d3ee)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+        <div className="absolute right-0 top-0 overflow-hidden rounded-bl-2xl rounded-tr-3xl bg-[linear-gradient(120deg,#6d4aff,#06b6d4)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
           Featured
         </div>
       )}
@@ -140,7 +140,7 @@ export function JobCard({ job, match, index, onOpen }: JobCardProps) {
           className={cn(
             'grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-all duration-200',
             'hover:scale-110 active:scale-90',
-            tracked ? 'text-[#22d3ee]' : 'text-faint hover:text-[var(--text)]',
+            tracked ? 'text-[#06b6d4]' : 'text-faint hover:text-[var(--text)]',
           )}
         >
           {tracked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}

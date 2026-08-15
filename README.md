@@ -48,11 +48,17 @@ The IDF table and per-job vectors are built once at module load, so the semantic
 similarity between your summary and each posting costs a sparse dot product. The
 whole board rescoring on every keystroke stays imperceptible.
 
-## Résumé parsing
+## Résumé import
 
-Paste résumé text and an n-gram scanner (up to trigrams, longest-match-wins) resolves
-70+ skills and their aliases — `ES6`, `react.js`, `Core Web Vitals`, `k8s` — against
-the canonical taxonomy. Runs entirely in the browser; nothing is uploaded.
+Drag in a **PDF, Word (.docx), TXT, Markdown, RTF or HTML** file — or paste text.
+An n-gram scanner (up to trigrams, longest-match-wins) resolves 70+ skills and their
+aliases — `ES6`, `react.js`, `Core Web Vitals`, `k8s` — against the canonical taxonomy,
+and a conservative header scrape fills in your name, headline and years of experience.
+
+Everything runs in the browser: `pdf.js` and `mammoth` are **dynamically imported**, so
+neither lands in the main bundle unless you actually drop a file in. Nothing is uploaded
+anywhere. Failure modes are handled explicitly — password-protected PDFs, scanned PDFs
+with no text layer, legacy `.doc`, and images all get a specific message and a way forward.
 
 ## What's in the app
 
@@ -64,18 +70,53 @@ the canonical taxonomy. Runs entirely in the browser; nothing is uploaded.
   histogram, and highest-leverage skill gaps weighted by demand and pay
 - **Tracker** — a five-stage application pipeline persisted to localStorage
 
-## Design & front-end notes
+## Motion & visuals
 
-- **Tailwind CSS v4** with a token-driven theme — every colour, surface and shadow is
-  a CSS custom property, so the light/dark switch is a single class on `<html>`
-- **Custom `@utility` layer** for the glassmorphism, gradient-border and grid treatments
+The background is **not** a video file or a static image — it is two live canvases:
+
+- **`FluidCanvas`** paints six drifting colour fields with additive blending, rendered
+  into a quarter-resolution buffer and scaled up under a heavy CSS blur. That is the
+  whole trick: a ~480×270 buffer costs almost nothing to paint, and once blurred it is
+  indistinguishable from a full-res render — full 60fps motion for a few KB instead of a
+  multi-megabyte clip that would still look softer on a retina display.
+- **`ParticleField`** adds a crisp constellation layer on top, at full resolution with a
+  DPR cap of 2 and a per-area particle budget.
+
+Both pause on tab-hide and render a single static frame under `prefers-reduced-motion`.
+`MediaBand` composes them into tinted section backgrounds, and each page gets its own
+palette preset so the app feels varied while sharing one motion language.
+
+`DemoReel` is a **scripted product reel** — a four-scene looping "screencast" assembled
+from live DOM rather than recorded. `VideoPanel` wraps it and will play a real `<video>`
+instead if you drop one into `public/media/` (see the README there); if that file is
+missing or fails to decode, it falls back to the reel, so the page can never show a hole.
+
+Elsewhere:
+
+- **Tailwind CSS v4** with a token-driven theme — every colour, surface and shadow is a
+  CSS custom property, so light/dark is a single class on `<html>`
 - **All charts are hand-rolled SVG** (radar, donut, histogram, sparkline, bar list) —
   no charting dependency, and they inherit the design tokens exactly
-- **Framer Motion** throughout: shared-layout nav pills, spring-driven drawer,
-  staggered card entrances, path-drawing underlines, animated score dials
-- **Accessibility** — semantic landmarks, keyboard-operable cards and drawer,
+- **Framer Motion** throughout: scroll-linked progress, word-by-word headline reveals
+  behind clip masks, count-up numerals, rules that draw themselves in, a shared-layout
+  nav underline, spring-driven drawer, and staggered scroll reveals
+- **Accessibility** — semantic landmarks, keyboard-operable cards, drawer and dropzone,
   visible focus rings, `prefers-reduced-motion` honoured globally
 - **No backend.** State lives in Zustand with a localStorage persist layer
+
+## Verification
+
+`npm run verify` runs three gates, and CI runs the same three before every deploy:
+
+| Script | What it proves |
+| --- | --- |
+| `npm run build` | Typechecks under `strict` and produces the bundle |
+| `npm run smoke` | Server-renders all five routes — catches render-time crashes |
+| `npm run test:resume` | Builds a real PDF in memory, runs it through pdf.js, and asserts the skill extractor and header scraper recover the right values |
+
+That third one is not decoration: it caught a genuine tokenizer bug where newlines were
+being *deleted* rather than converted to spaces, so `Tailwind CSS,\nNode.js` collapsed to
+`cssnode js` and silently dropped the first skill on every line of a real résumé.
 
 ## Project structure
 

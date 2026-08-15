@@ -139,12 +139,17 @@ export interface TierMeta {
   min: number
 }
 
+/**
+ * A saturated spectrum ramp — green through cyan, violet, amber, rose. Each
+ * value stays readable on both the light and dark grounds, and the ordering
+ * means a glance at the colour alone tells you roughly where a role sits.
+ */
 export const MATCH_TIERS: Record<MatchTier, TierMeta> = {
-  exceptional: { label: 'Exceptional fit', color: '#34d399', min: 88 },
-  strong: { label: 'Strong fit', color: '#22d3ee', min: 74 },
-  promising: { label: 'Promising', color: '#7c5cff', min: 58 },
-  stretch: { label: 'Stretch role', color: '#fbbf24', min: 40 },
-  weak: { label: 'Long shot', color: '#fb7185', min: 0 },
+  exceptional: { label: 'Exceptional fit', color: '#10b981', min: 88 },
+  strong: { label: 'Strong fit', color: '#06b6d4', min: 74 },
+  promising: { label: 'Promising', color: '#6d4aff', min: 58 },
+  stretch: { label: 'Stretch role', color: '#f59e0b', min: 40 },
+  weak: { label: 'Long shot', color: '#f43f5e', min: 0 },
 }
 
 export function tierFor(score: number): MatchTier {
@@ -160,11 +165,11 @@ export type ApplicationStage = 'saved' | 'applied' | 'interviewing' | 'offer' | 
 export const STAGES: ApplicationStage[] = ['saved', 'applied', 'interviewing', 'offer', 'rejected']
 
 export const STAGE_META: Record<ApplicationStage, { label: string; color: string; hint: string }> = {
-  saved: { label: 'Saved', color: '#7c5cff', hint: 'Shortlisted, not applied yet' },
-  applied: { label: 'Applied', color: '#22d3ee', hint: 'Application submitted' },
-  interviewing: { label: 'Interviewing', color: '#fbbf24', hint: 'In the loop' },
-  offer: { label: 'Offer', color: '#34d399', hint: 'Offer on the table' },
-  rejected: { label: 'Closed', color: '#fb7185', hint: 'No longer moving forward' },
+  saved: { label: 'Saved', color: '#6d4aff', hint: 'Shortlisted, not applied yet' },
+  applied: { label: 'Applied', color: '#06b6d4', hint: 'Application submitted' },
+  interviewing: { label: 'Interviewing', color: '#f59e0b', hint: 'In the loop' },
+  offer: { label: 'Offer', color: '#10b981', hint: 'Offer on the table' },
+  rejected: { label: 'Closed', color: '#f43f5e', hint: 'No longer moving forward' },
 }
 
 export interface Application {

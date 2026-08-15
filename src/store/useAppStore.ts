@@ -98,7 +98,7 @@ export const useAppStore = create<AppState>()(
       profile: DEFAULT_PROFILE,
       filters: EMPTY_FILTERS,
       applications: {},
-      theme: 'dark',
+      theme: 'light',
       explainMode: true,
 
       setProfile: (patch) => set((st) => ({ profile: { ...st.profile, ...patch } })),
@@ -194,7 +194,9 @@ export const useAppStore = create<AppState>()(
       toggleExplain: () => set((st) => ({ explainMode: !st.explainMode })),
     }),
     {
-      name: 'nexushire.v1',
+      // Bumped from v1 with the editorial redesign so anyone carrying a
+      // persisted dark-theme preference lands on the new light default.
+      name: 'nexushire.v2',
       partialize: (st) => ({
         profile: st.profile,
         applications: st.applications,

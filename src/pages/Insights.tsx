@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { BarList, DonutChart, Histogram, RadarChart, Sparkline } from '@/components/charts/Charts'
 import { SectionLabel } from '@/components/ui/primitives'
 import { ScorePill } from '@/components/ui/ScoreRing'
+import { FRESH_BLOBS, PageBanner } from '@/components/visual/MediaBand'
 import { useMatches } from '@/hooks/useMatches'
 import { JOBS } from '@/lib/jobs'
 import { analyseGaps } from '@/lib/matching'
@@ -80,24 +81,14 @@ export function Insights() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-7"
-      >
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c5cff]">
-          <BarChart3 className="h-3 w-3" />
-          Aggregate view
-        </div>
-        <h1 className="font-display text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-tight">
-          Insights
-        </h1>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">
-          Your profile scored against the entire corpus at once — where you're consistently strong,
-          and which single skills unlock the most roles.
-        </p>
-      </motion.div>
+      <PageBanner
+        eyebrow="Aggregate view"
+        icon={<BarChart3 className="h-3 w-3" />}
+        title="Insights"
+        blobs={FRESH_BLOBS}
+        body="Your profile scored against the entire corpus at once — where you're consistently strong, and which single skills unlock the most roles."
+        aside={<Sparkline points={trajectory} color="#10b981" width={170} height={54} />}
+      />
 
       {/* KPI row */}
       <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -105,17 +96,17 @@ export function Insights() {
           icon={<Target className="h-4 w-4" />}
           label="Average match"
           value={`${stats.average}%`}
-          accent="#7c5cff"
+          accent="#6d4aff"
           delay={0}
         >
-          <Sparkline points={trajectory} color="#7c5cff" width={100} height={30} />
+          <Sparkline points={trajectory} color="#6d4aff" width={100} height={30} />
         </KpiCard>
         <KpiCard
           icon={<Sparkles className="h-4 w-4" />}
           label="Strong or better"
           value={`${stats.reachable}`}
           sub={`of ${JOBS.length} roles`}
-          accent="#34d399"
+          accent="#10b981"
           delay={0.08}
         />
         <KpiCard
@@ -123,7 +114,7 @@ export function Insights() {
           label="Skills on file"
           value={`${profile.skills.length}`}
           sub={`${stats.categoryCounts.size} categories`}
-          accent="#22d3ee"
+          accent="#06b6d4"
           delay={0.16}
         />
         <KpiCard
@@ -131,7 +122,7 @@ export function Insights() {
           label="Best reachable pay"
           value={stats.bestPaying ? `$${Math.round(stats.bestPaying.salaryMax / 1000)}k` : '—'}
           sub={stats.bestPaying?.company}
-          accent="#fbbf24"
+          accent="#f59e0b"
           delay={0.24}
         />
       </div>
@@ -140,7 +131,7 @@ export function Insights() {
         {/* Facet radar */}
         <Card title="Where you're strong" subtitle="Mean facet score across all 26 postings">
           <div className="grid place-items-center py-2">
-            <RadarChart axes={stats.facetAverages} size={250} color="#22d3ee" />
+            <RadarChart axes={stats.facetAverages} size={250} color="#06b6d4" />
           </div>
         </Card>
 
@@ -180,7 +171,7 @@ export function Insights() {
           <div className="pt-4">
             <Histogram
               buckets={stats.buckets}
-              colors={['#fb7185', '#fbbf24', '#fbbf24', '#7c5cff', '#22d3ee', '#34d399']}
+              colors={['#f43f5e', '#f59e0b', '#f59e0b', '#6d4aff', '#06b6d4', '#10b981']}
             />
             <div className="mt-2 flex justify-between text-[10px] text-faint">
               {['40', '50', '60', '70', '80', '90+'].map((label) => (

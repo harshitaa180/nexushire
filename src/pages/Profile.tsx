@@ -1,19 +1,30 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Check,
+  FileSearch,
   Loader2,
   Plus,
   RotateCcw,
   ScanLine,
   Sparkles,
   Trash2,
+  TriangleAlert,
+  UploadCloud,
   UserRound,
   Wand2,
   X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Button, Chip, SectionLabel } from '@/components/ui/primitives'
+import { PageBanner, WARM_BLOBS } from '@/components/visual/MediaBand'
 import { ALL_TAGS, REGIONS } from '@/lib/jobs'
+import {
+  ACCEPTED_TYPES,
+  ResumeExtractionError,
+  extractTextFromFile,
+  guessFacts,
+  type ResumeFacts,
+} from '@/lib/resume'
 import { CATEGORY_META, SKILLS, extractSkills, skillColor, skillLabel } from '@/lib/skills'
 import {
   SENIORITY_LABEL,
@@ -54,24 +65,13 @@ export function Profile() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-24 pt-28 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-7"
-      >
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c5cff]">
-          <UserRound className="h-3 w-3" />
-          Your inputs to the model
-        </div>
-        <h1 className="font-display text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-tight">
-          Profile
-        </h1>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">
-          Everything here feeds the matcher directly. Change a single skill level and every score on
-          the board recalculates — there is no save button because there is no server.
-        </p>
-      </motion.div>
+      <PageBanner
+        eyebrow="Your inputs to the model"
+        icon={<UserRound className="h-3 w-3" />}
+        title="Profile"
+        blobs={WARM_BLOBS}
+        body="Everything here feeds the matcher directly. Change a single skill level and every score on the board recalculates — there is no save button because there is no server."
+      />
 
       {/* Tabs */}
       <div className="mb-6 inline-flex gap-1 rounded-2xl glass p-1">
@@ -94,7 +94,7 @@ export function Profile() {
             {tab === key && (
               <motion.span
                 layoutId="profile-tab"
-                className="absolute inset-0 rounded-xl bg-[linear-gradient(120deg,#7c5cff,#6d5cff)]"
+                className="absolute inset-0 rounded-xl bg-[linear-gradient(120deg,#6d4aff,#5b3df0)]"
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               />
             )}
@@ -404,45 +404,183 @@ function SkillsPanel({
 
 /* ═════════════════════════════ Import ══════════════════════════════════ */
 
-type ScanState = { phase: 'idle' } | { phase: 'scanning' } | { phase: 'done'; found: string[]; added: number }
+type ScanState =
+  | { phase: 'idle' }
+  | { phase: 'reading'; stage: string; fileName: string }
+  | { phase: 'scanning' }
+  | { phase: 'error'; message: string; hint?: string }
+  | {
+      phase: 'done'
+      found: string[]
+      added: number
+      source: string
+      warnings: string[]
+      facts: ResumeFacts
+    }
 
 function ImportPanel() {
   const mergeSkills = useAppStore((st) => st.mergeSkills)
   const setProfile = useAppStore((st) => st.setProfile)
   const [text, setText] = useState('')
   const [state, setState] = useState<ScanState>({ phase: 'idle' })
+  const [dragging, setDragging] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  // Drag events fire per-child, so track depth rather than toggling a boolean.
+  const dragDepth = useRef(0)
 
-  const runScan = () => {
-    if (!text.trim()) return
+  /** Runs the taxonomy scan over whatever text we ended up with. */
+  const scanText = (source: string, label: string, warnings: string[] = []) => {
+    if (!source.trim()) {
+      setState({
+        phase: 'error',
+        message: 'No readable text was found.',
+        hint: 'Try a different file, or paste the text directly.',
+      })
+      return
+    }
+
     setState({ phase: 'scanning' })
 
     // A short deliberate delay so the scan animation is legible — the parse
     // itself is synchronous and takes well under a millisecond.
     window.setTimeout(() => {
-      const found = extractSkills(text)
+      const found = extractSkills(source)
       const added = mergeSkills(found)
-      const firstLine = text.trim().split('\n')[0]?.trim()
-      if (firstLine && firstLine.length < 80) {
-        const [name, headline] = firstLine.split(/\s*[—–-]\s*/)
-        if (name) setProfile({ name: name.trim() })
-        if (headline) setProfile({ headline: headline.trim() })
+
+      // Only fill fields the parser is confident about, and never clobber a
+      // value the user has already customised away from the default.
+      const facts = guessFacts(source)
+      const patch: Parameters<typeof setProfile>[0] = {}
+      if (facts.name) patch.name = facts.name
+      if (facts.headline) patch.headline = facts.headline
+      if (facts.yearsExperience) patch.yearsExperience = facts.yearsExperience
+      if (Object.keys(patch).length) setProfile(patch)
+
+      setState({ phase: 'done', found, added, source: label, warnings, facts })
+    }, 900)
+  }
+
+  const handleFile = async (file: File) => {
+    setState({ phase: 'reading', stage: 'Opening the file', fileName: file.name })
+    try {
+      const result = await extractTextFromFile(file, (stage) =>
+        setState({ phase: 'reading', stage, fileName: file.name }),
+      )
+      setText(result.text)
+      const label = `${file.name}${result.pages ? ` · ${result.pages} pages` : ''}`
+      scanText(result.text, label, result.warnings)
+    } catch (error) {
+      if (error instanceof ResumeExtractionError) {
+        setState({ phase: 'error', message: error.message, hint: error.hint })
+      } else {
+        setState({
+          phase: 'error',
+          message: 'Something went wrong reading that file.',
+          hint: (error as Error).message,
+        })
       }
-      setState({ phase: 'done', found, added })
-    }, 1100)
+    }
+  }
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    dragDepth.current = 0
+    setDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) void handleFile(file)
   }
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title="Paste your résumé">
-        <p className="-mt-1 mb-3 text-[12.5px] text-faint">
-          An n-gram scanner walks the text and resolves aliases — “ES6”, “react.js”, “Core Web
-          Vitals” — against the canonical taxonomy. Nothing leaves your browser.
-        </p>
+      <Panel title="Upload or paste">
+        {/* ── Drop zone ─────────────────────────────────────── */}
+        <div
+          onDragEnter={(e) => {
+            e.preventDefault()
+            dragDepth.current += 1
+            setDragging(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            dragDepth.current -= 1
+            if (dragDepth.current <= 0) setDragging(false)
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              inputRef.current?.click()
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload a résumé file"
+          className={cn(
+            'relative cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed p-7 text-center',
+            'transition-all duration-300',
+            dragging
+              ? 'scale-[1.01] border-[var(--ink)] bg-[var(--ink-soft)]'
+              : 'border-[rgb(var(--border)/0.28)] hover:border-[rgb(var(--border)/0.5)] hover:bg-[var(--ink-soft)]',
+          )}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept={ACCEPTED_TYPES}
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleFile(file)
+              // Reset so picking the same file twice still fires a change.
+              e.target.value = ''
+            }}
+          />
+
+          <motion.div
+            animate={dragging ? { y: -4, scale: 1.08 } : { y: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-[linear-gradient(140deg,#6d4aff22,#06b6d422)] text-ink"
+          >
+            <UploadCloud className="h-5 w-5" />
+          </motion.div>
+
+          <div className="text-[14px] font-medium">
+            {dragging ? 'Drop it here' : 'Drop your résumé, or click to browse'}
+          </div>
+          <div className="mt-1.5 text-[12px] text-faint">
+            PDF, Word (.docx), plain text, Markdown, RTF or HTML · up to 20MB
+          </div>
+
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+            {['PDF', 'DOCX', 'TXT', 'MD', 'RTF', 'HTML'].map((format) => (
+              <span
+                key={format}
+                className="rounded border border-[rgb(var(--border)/var(--border-alpha))] px-1.5 py-0.5 font-mono text-[9.5px] text-faint"
+              >
+                {format}
+              </span>
+            ))}
+          </div>
+
+          <p className="mt-3 text-[11px] text-faint">
+            Parsed entirely in your browser — the file is never uploaded.
+          </p>
+        </div>
+
+        {/* ── Paste alternative ─────────────────────────────── */}
+        <div className="my-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-[rgb(var(--border)/var(--border-alpha))]" />
+          <span className="text-[11px] text-faint">or paste the text</span>
+          <div className="h-px flex-1 bg-[rgb(var(--border)/var(--border-alpha))]" />
+        </div>
+
         <div className="relative">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={16}
+            rows={9}
             placeholder="Paste résumé text here…"
             className={cn(inputClass, 'font-mono text-[12px] leading-relaxed')}
           />
@@ -451,8 +589,7 @@ function ImportPanel() {
               <div
                 className="absolute inset-x-0 h-24 animate-scan"
                 style={{
-                  background:
-                    'linear-gradient(180deg, transparent, rgba(34,211,238,0.22), transparent)',
+                  background: 'linear-gradient(180deg, transparent, rgba(109,74,255,0.22), transparent)',
                 }}
               />
             </div>
@@ -461,8 +598,8 @@ function ImportPanel() {
 
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
-            onClick={runScan}
-            disabled={!text.trim() || state.phase === 'scanning'}
+            onClick={() => scanText(text, 'pasted text')}
+            disabled={!text.trim() || state.phase === 'scanning' || state.phase === 'reading'}
             icon={
               state.phase === 'scanning' ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -506,11 +643,56 @@ function ImportPanel() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-[13.5px] text-faint"
+              className="text-[13.5px] leading-relaxed text-faint"
             >
-              Paste some text and hit <span className="text-[var(--text)]">Extract skills</span>. Any
-              skill the parser recognises and you don't already have will be added at level 3.
+              Drop a file above, or paste text and hit{' '}
+              <span className="text-[var(--text)]">Extract skills</span>. Any skill the parser
+              recognises and you don't already have is added at level 3.
             </motion.p>
+          )}
+
+          {state.phase === 'reading' && (
+            <motion.div
+              key="reading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-[rgb(var(--border)/var(--border-alpha))] px-3.5 py-3">
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-ink" />
+                <div className="min-w-0">
+                  <div className="truncate text-[13px] font-medium">{state.fileName}</div>
+                  <div className="truncate text-[11.5px] text-faint">{state.stage}…</div>
+                </div>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-[var(--ring-track)]">
+                <motion.div
+                  className="h-full w-1/3 rounded-full bg-[linear-gradient(90deg,#6d4aff,#06b6d4)]"
+                  animate={{ x: ['-100%', '320%'] }}
+                  transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {state.phase === 'error' && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="rounded-2xl border border-[#f43f5e40] bg-[#f43f5e0f] p-4"
+            >
+              <div className="flex items-start gap-2.5">
+                <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#f43f5e]" />
+                <div>
+                  <div className="text-[13.5px] font-medium">{state.message}</div>
+                  {state.hint && (
+                    <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{state.hint}</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {state.phase === 'scanning' && (
@@ -539,18 +721,52 @@ function ImportPanel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
             >
-              <div className="mb-4 flex items-center gap-2.5 rounded-2xl border border-[#34d39933] bg-[#34d3990f] px-3.5 py-2.5">
-                <span className="grid h-7 w-7 place-items-center rounded-lg bg-[#34d39922] text-[#34d399]">
-                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                </span>
-                <div className="text-[13px]">
-                  <span className="font-semibold">{state.found.length} skills recognised</span>
-                  <span className="text-faint">
-                    {' · '}
-                    {state.added} newly added to your profile
+              <div className="mb-4 rounded-2xl border border-[#10b98140] bg-[#10b9810f] px-3.5 py-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#10b98122] text-[#10b981]">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
                   </span>
+                  <div className="min-w-0 text-[13px]">
+                    <span className="font-semibold">{state.found.length} skills recognised</span>
+                    <span className="text-faint">
+                      {' · '}
+                      {state.added} newly added
+                    </span>
+                    <div className="truncate text-[11.5px] text-faint">from {state.source}</div>
+                  </div>
                 </div>
               </div>
+
+              {/* Fields the parser was confident enough to fill in */}
+              {(state.facts.name || state.facts.headline || state.facts.yearsExperience) && (
+                <div className="mb-4">
+                  <SectionLabel icon={<FileSearch className="h-3 w-3" />}>
+                    Also detected
+                  </SectionLabel>
+                  <div className="space-y-1.5 text-[12.5px]">
+                    {state.facts.name && <DetectedRow label="Name" value={state.facts.name} />}
+                    {state.facts.headline && (
+                      <DetectedRow label="Headline" value={state.facts.headline} />
+                    )}
+                    {state.facts.yearsExperience && (
+                      <DetectedRow
+                        label="Experience"
+                        value={`${state.facts.yearsExperience} years`}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {state.warnings.map((warning) => (
+                <div
+                  key={warning}
+                  className="mb-3 flex items-start gap-2 rounded-xl border border-[#f59e0b40] bg-[#f59e0b0f] px-3 py-2.5 text-[12px] leading-relaxed text-muted"
+                >
+                  <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#f59e0b]" />
+                  {warning}
+                </div>
+              ))}
 
               <SectionLabel icon={<Sparkles className="h-3 w-3" />}>Recognised</SectionLabel>
               <div className="flex flex-wrap gap-1.5">
@@ -587,6 +803,16 @@ const inputClass = cn(
   'placeholder:text-faint transition-colors duration-200',
   'focus:border-[rgb(var(--border)/0.35)] focus:bg-[rgb(var(--surface)/0.16)]',
 )
+
+/** One "we also detected this" row in the extraction result panel. */
+function DetectedRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className="w-20 shrink-0 text-faint">{label}</span>
+      <span className="min-w-0 truncate font-medium">{value}</span>
+    </div>
+  )
+}
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (

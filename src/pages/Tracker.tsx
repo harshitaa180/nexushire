@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, KanbanSquare, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button, CompanyMark, EmptyState, SectionLabel } from '@/components/ui/primitives'
 import { ScorePill } from '@/components/ui/ScoreRing'
+import { EMBER_BLOBS, PageBanner } from '@/components/visual/MediaBand'
 import { useMatches } from '@/hooks/useMatches'
 import { JOBS } from '@/lib/jobs'
 import { STAGES, STAGE_META, type ApplicationStage } from '@/lib/types'
@@ -23,25 +24,17 @@ export function Tracker() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-7"
-      >
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c5cff]">
-          <KanbanSquare className="h-3 w-3" />
-          Pipeline
-        </div>
-        <h1 className="font-display text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-tight">
-          Application tracker
-        </h1>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">
-          {entries.length === 0
+      <PageBanner
+        eyebrow="Pipeline"
+        icon={<KanbanSquare className="h-3 w-3" />}
+        title="Application tracker"
+        blobs={EMBER_BLOBS}
+        body={
+          entries.length === 0
             ? 'Save a role from the job board and it lands here.'
-            : `${entries.length} ${entries.length === 1 ? 'role' : 'roles'} in flight. Move cards with the arrows — state persists in localStorage.`}
-        </p>
-      </motion.div>
+            : `${entries.length} ${entries.length === 1 ? 'role' : 'roles'} in flight. Move cards with the arrows — state persists in localStorage.`
+        }
+      />
 
       {entries.length === 0 ? (
         <EmptyState

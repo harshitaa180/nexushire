@@ -5,6 +5,8 @@ import { FilterBar } from '@/components/jobs/FilterBar'
 import { JobCard } from '@/components/jobs/JobCard'
 import { JobDetail } from '@/components/jobs/JobDetail'
 import { Button, EmptyState } from '@/components/ui/primitives'
+import { ScoreRing } from '@/components/ui/ScoreRing'
+import { COOL_BLOBS, PageBanner } from '@/components/visual/MediaBand'
 import { useFilteredJobs } from '@/hooks/useMatches'
 import { useAppStore } from '@/store/useAppStore'
 
@@ -19,22 +21,13 @@ export function Jobs() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-28 sm:px-6">
-      {/* Page header */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-6"
-      >
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c5cff]">
-          <Sparkles className="h-3 w-3" />
-          Matched for {profile.headline || 'you'}
-        </div>
-        <h1 className="font-display text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-tight">
-          Discover roles
-        </h1>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">
-          {rows.length > 0 ? (
+      <PageBanner
+        eyebrow={`Matched for ${profile.headline || 'you'}`}
+        icon={<Sparkles className="h-3 w-3" />}
+        title="Discover roles"
+        blobs={COOL_BLOBS}
+        body={
+          rows.length > 0 ? (
             <>
               Your strongest match right now is{' '}
               <span className="font-semibold text-[var(--text)]">{best}%</span>. Open any card to see
@@ -42,9 +35,10 @@ export function Jobs() {
             </>
           ) : (
             'Nothing matches the current filters.'
-          )}
-        </p>
-      </motion.div>
+          )
+        }
+        aside={rows.length > 0 ? <ScoreRing score={best} size={92} stroke={3} showLabel /> : undefined}
+      />
 
       <FilterBar resultCount={rows.length} />
 

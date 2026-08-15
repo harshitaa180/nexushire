@@ -9,12 +9,16 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
-    "smoke": "vite build --ssr smoke/ssr-entry.tsx --outDir smoke-dist --logLevel warn && node smoke/run.mjs"
+    "smoke": "vite build --ssr smoke/ssr-entry.tsx --outDir smoke-dist --logLevel warn && node smoke/run.mjs",
+    "test:resume": "vite build --ssr smoke/resume-entry.ts --outDir smoke-dist-resume --logLevel warn && node smoke-dist-resume/resume-entry.js",
+    "verify": "npm run build && npm run smoke && npm run test:resume"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0",
+    "mammoth": "^1.12.1",
+    "pdfjs-dist": "^6.2.108",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",

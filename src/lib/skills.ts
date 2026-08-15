@@ -29,13 +29,13 @@ export interface Skill {
 }
 
 export const CATEGORY_META: Record<SkillCategory, { label: string; color: string }> = {
-  language: { label: 'Languages', color: '#7c5cff' },
-  frontend: { label: 'Frontend', color: '#22d3ee' },
-  backend: { label: 'Backend', color: '#34d399' },
-  data: { label: 'Data & AI', color: '#f472b6' },
-  infra: { label: 'Infra & DevOps', color: '#fbbf24' },
-  design: { label: 'Design', color: '#fb7185' },
-  practice: { label: 'Practices', color: '#94a3b8' },
+  language: { label: 'Languages', color: '#6d4aff' },
+  frontend: { label: 'Frontend', color: '#06b6d4' },
+  backend: { label: 'Backend', color: '#10b981' },
+  data: { label: 'Data & AI', color: '#c026d3' },
+  infra: { label: 'Infra & DevOps', color: '#f59e0b' },
+  design: { label: 'Design', color: '#f43f5e' },
+  practice: { label: 'Practices', color: '#0ea5e9' },
 }
 
 const raw: Array<
@@ -170,12 +170,18 @@ const ALIAS_INDEX = (() => {
 })()
 
 export function normalise(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[._/\\]/g, ' ')
-    .replace(/[^a-z0-9+# ]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return (
+    text
+      .toLowerCase()
+      // Separators inside a token become word boundaries: "node.js" → "node js".
+      .replace(/[._/\\]/g, ' ')
+      // Everything else that isn't a valid token character collapses to a single
+      // space. This has to *replace* rather than delete — deleting would splice
+      // words together across line breaks ("CSS,\nNode.js" → "cssnode js") and
+      // silently lose the skill at the start of every line.
+      .replace(/[^a-z0-9+#]+/g, ' ')
+      .trim()
+  )
 }
 
 /**

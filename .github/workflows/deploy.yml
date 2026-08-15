@@ -34,6 +34,9 @@ jobs:
       - name: Smoke test every route
         run: npm run smoke
 
+      - name: Verify the résumé pipeline end to end
+        run: npm run test:resume
+
       # GitHub Pages has no rewrite rules, so it serves 404.html for any path
       # it doesn't recognise. Making that a copy of index.html boots the SPA
       # with the URL intact, which is what React Router needs for deep links.

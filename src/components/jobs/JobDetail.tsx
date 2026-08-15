@@ -107,10 +107,10 @@ export function JobDetail({ job, match, onClose }: JobDetailProps) {
               </div>
 
               <div className="relative mt-4 flex flex-wrap gap-1.5">
-                <Chip color="#7c5cff">{SENIORITY_LABEL[job.seniority]}</Chip>
-                <Chip color="#22d3ee">{WORK_MODE_LABEL[job.workMode]}</Chip>
-                <Chip color="#34d399">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</Chip>
-                <Chip color="#fbbf24">{job.employmentType}</Chip>
+                <Chip color="#6d4aff">{SENIORITY_LABEL[job.seniority]}</Chip>
+                <Chip color="#06b6d4">{WORK_MODE_LABEL[job.workMode]}</Chip>
+                <Chip color="#10b981">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</Chip>
+                <Chip color="#f59e0b">{job.employmentType}</Chip>
                 {job.tags.map((tag) => (
                   <Chip key={tag}>{tag}</Chip>
                 ))}
@@ -137,7 +137,7 @@ export function JobDetail({ job, match, onClose }: JobDetailProps) {
                       transition={{ delay: i * 0.05 }}
                       className="flex gap-2.5 text-[13.5px] leading-relaxed text-muted"
                     >
-                      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[#34d399]" strokeWidth={3} />
+                      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[#10b981]" strokeWidth={3} />
                       {item}
                     </motion.li>
                   ))}
@@ -148,7 +148,7 @@ export function JobDetail({ job, match, onClose }: JobDetailProps) {
                 <SectionLabel>Perks</SectionLabel>
                 <div className="flex flex-wrap gap-1.5">
                   {job.perks.map((perk) => (
-                    <Chip key={perk} color="#34d399">
+                    <Chip key={perk} color="#10b981">
                       {perk}
                     </Chip>
                   ))}
@@ -172,7 +172,7 @@ export function JobDetail({ job, match, onClose }: JobDetailProps) {
 
               <div className="mt-6 rounded-2xl border border-dashed border-[rgb(var(--border)/0.3)] p-4">
                 <div className="flex items-center gap-2 text-[13px] font-medium">
-                  <Banknote className="h-4 w-4 text-[#34d399]" />
+                  <Banknote className="h-4 w-4 text-[#10b981]" />
                   Compensation band
                 </div>
                 <SalaryBand job={job} />
@@ -232,8 +232,8 @@ function SalaryBand({ job }: { job: Job }) {
           className="absolute inset-y-0 rounded-full"
           style={{
             left: `${pct(job.salaryMin)}%`,
-            background: 'linear-gradient(90deg,#34d39999,#34d399)',
-            boxShadow: '0 0 14px #34d39980',
+            background: 'linear-gradient(90deg,#10b98199,#10b981)',
+            boxShadow: '0 0 14px #10b98180',
           }}
           initial={{ width: 0 }}
           animate={{ width: `${pct(job.salaryMax) - pct(job.salaryMin)}%` }}
@@ -241,13 +241,13 @@ function SalaryBand({ job }: { job: Job }) {
         />
         {/* The candidate's floor */}
         <div
-          className="absolute -top-1 h-4 w-0.5 rounded-full bg-[#fbbf24]"
-          style={{ left: `${pct(target)}%`, boxShadow: '0 0 10px #fbbf24' }}
+          className="absolute -top-1 h-4 w-0.5 rounded-full bg-[#f59e0b]"
+          style={{ left: `${pct(target)}%`, boxShadow: '0 0 10px #f59e0b' }}
         />
       </div>
       <div className="mt-2 flex justify-between text-[11px] text-faint">
         <span>${Math.round(job.salaryMin / 1000)}k</span>
-        <span className="text-[#fbbf24]">your target ${Math.round(target / 1000)}k</span>
+        <span className="text-[#f59e0b]">your target ${Math.round(target / 1000)}k</span>
         <span>${Math.round(job.salaryMax / 1000)}k</span>
       </div>
     </div>

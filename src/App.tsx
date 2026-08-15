@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Navbar } from '@/components/layout/Navbar'
+import { ScrollProgress } from '@/components/ui/motion'
 import { Backdrop } from '@/components/visual/Backdrop'
 import { Insights } from '@/pages/Insights'
 import { Jobs } from '@/pages/Jobs'
@@ -31,6 +32,7 @@ export default function App() {
   return (
     <>
       <Backdrop />
+      <ScrollProgress />
       <Navbar />
 
       <main className="relative min-h-screen">
@@ -61,13 +63,20 @@ export default function App() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-[rgb(var(--border)/var(--border-alpha))] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-[12px] text-faint">
-        <span>
-          <span className="font-display font-semibold text-[var(--text)]">NexusHire</span> — an
-          explainable job-matching engine. All scoring runs client-side.
+    <footer className="relative mt-10 border-t border-[rgb(var(--border)/var(--border-alpha))] px-4 py-10 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-6">
+        <div>
+          <div className="font-display text-[17px] font-semibold tracking-[-0.02em]">
+            Nexus<span className="text-ink">Hire</span>
+          </div>
+          <p className="mt-1.5 max-w-sm text-[12.5px] leading-relaxed text-faint">
+            An explainable job-matching engine. All scoring and résumé parsing run in your
+            browser — nothing is uploaded.
+          </p>
+        </div>
+        <span className="font-mono text-[11.5px] text-faint">
+          React · TypeScript · Vite · Tailwind · Framer Motion
         </span>
-        <span className="font-mono">React · TypeScript · Vite · Tailwind · Framer Motion</span>
       </div>
     </footer>
   )
